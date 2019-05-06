@@ -37,7 +37,8 @@ emptyBoard([
 goMove(Board, Player, [R,C], RBoard):-
 	
     replace(Row, R, NRow, Board, RBoard),
-    replace("-", C, Player, Row, NRow).
+    replace("-", C, Player, Row, NRow),
+	encerrado(Board , [R,C,Player] , [] , Rta).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
@@ -59,17 +60,15 @@ replace(X, XIndex, Y, [Xi|Xs], [Xi|XsY]):-
 
 encerrado(Board, [R,C,Color] , Capturados , [ [R,C,Color] | Capturados ]):-
 	adyacentes(Board , [R,C] , Adyacentes),
-	forall( ( (member[R1,C1,Color1] , Adyacentes) , not(member( [R1,C1,Color1] , Capturados ) ,
+	forall( (  member([R1,C1,Color1] , Adyacentes) , not(member([R1,C1,Color1] , Capturados) )  ) ,
 			   sonOpuestos(Color1,Color) ).
-	%eliminar la ficha
+	
 	
 	
 encerrado(Board,  [R,C,Color] , Capturados , [ [R,C,Color] | Aeliminar ]):-
 	adyacentes(Board , [R,C] , Adyacentes),
-	forall(  ( (member[R1,C1,Color1] , Adyacentes) , (not(member([R1,C1,Color],Capturados))) , not(sonOpuestos(Color1,Color))  ,
-		  ( notGuion(Color1) , encerrado(Board,[R1,C1,Color1] , [ [R,C,Color] | Capturados ] , Aeliminar ) ), 
-	
-	%eliminar la ficha
+	forall(  ( (member([R1,C1,Color1] , Adyacentes) , (not(member([R1,C1,Color],Capturados))) , not(sonOpuestos(Color1,Color)) ) ,
+		  ( notGuion(Color1) , encerrado(Board,[R1,C1,Color1] , [ [R,C,Color] | Capturados ] , Aeliminar ) )   )    .
 
 
 
@@ -77,24 +76,7 @@ encerrado(Board,  [R,C,Color] , Capturados , [ [R,C,Color] | Aeliminar ]):-
 
 
 
-
-
-capturar(Board,Player,[R,C],RBoard):-
-	adyacentes(Board,[R,C],LAdyacentes),
-	nth0(0,LAdyacentes,[R1,C1,Color1]),
-	esCapturada(Board,Player,[R1,C1,Color1],RBoard1,[],_).
-	
-esCapturada(Board,Player,[R,C,Color],RBoard,Capturados,[ [R,C,Color]|CapturadosN ]):-
-	sonOpuestos(Player,Color), %Verifica que se este capturando una ficha del color opuesto al que la colocó.
-	not(member([R,C,Color],Capturados)),
-	adyacentes(Board,[R,C],LAdyacentes),
-	
-	esCapturada(Board,Player,
-
-
-%Devuelve en LAdyacentes una lista de las 4 fichas adyacentes a la ficha ubicada en [R,C] 
-%Donde el tercer parametro F... de cada sublista representa el color de la ficha.
-adyacentes(Board,[R,C],LValida):-
+adyacentes(Board,[R,C],Lvalida):-
 	C1 is C-1,
 	C2 is C+1,
 	R1 is R-1,
@@ -106,13 +88,13 @@ adyacentes(Board,[R,C],LValida):-
 	LAdyacentes = [ [R2,C,Fup] , [R1,C,Fdown] , [R,C1,Fleft] , [R,C2,Fright] ],
 	adyacentesValidos(LAdyacentes,Lvalida).
 	
-adyacentesValidos([],[]).	
+adyacentesValidos([],[]).
 	
-adyacentesValidos([ [R,C,Color] | Lad ] , [ [R,C,Color] | LNueva ]):-
+adyacentesValidos([ [_,_,Color] | Lad ] , [ [_,_,Color] | LNueva ]):-
 	Color \= ".",
 	adyacentesValidos(Lad,LNueva).
 
-adyacentesValidos([ [R,C,Color] | Lad ] , LNueva):-
+adyacentesValidos([ [_,_,Color] | Lad ] , LNueva):-
 	Color = ".",
 	adyacentesValidos(Lad,LNueva).
 
@@ -120,18 +102,18 @@ adyacentesValidos([ [R,C,Color] | Lad ] , LNueva):-
 % Si la posicion solicitada esta fuera del limite, la ficha sera un "." indicando que se salio del tablero.
 ficha(Board,R,C,Ficha):-
 	dentroDelTablero(R,C),
-	nth0(R1,Board,Fila),
-	nth0(C1,Fila,Ficha).
+	nth0(R,Board,Fila),
+	nth0(C,Fila,Ficha).
 	
-ficha(Board,R,C,Ficha):-
+ficha(_,R,C,Ficha):-
 	not(dentroDelTablero(R,C)),
 	Ficha = ".".
 
 dentroDelTablero(R,C):-
-	R>0,
-	C>0,
-	R<20,
-	C<20.
+	R>=0,
+	C>=0,
+	R<19,
+	C<19 .
 	
 sonOpuestos(Color1,Color2):-
 	Color1 = w,

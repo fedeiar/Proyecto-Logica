@@ -60,14 +60,14 @@ replace(X, XIndex, Y, [Xi|Xs], [Xi|XsY]):-
 
 encerrado(Board, [R,C,Color] , Capturados , [ [R,C,Color] | Capturados ]):-
 	adyacentes(Board , [R,C] , Adyacentes),
-	forall( (  member([R1,C1,Color1] , Adyacentes) , not(member([R1,C1,Color1] , Capturados) )  ) ,
+	forall( (  member([R1,C1,Color1] , Adyacentes) , not(member([R1,C1,Color1] , Capturados))  ) ,
 			   sonOpuestos(Color1,Color) ).
 	
 	
 	
 encerrado(Board,  [R,C,Color] , Capturados , [ [R,C,Color] | Aeliminar ]):-
 	adyacentes(Board , [R,C] , Adyacentes),
-	forall(  ( (member([R1,C1,Color1] , Adyacentes) , (not(member([R1,C1,Color],Capturados))) , not(sonOpuestos(Color1,Color)) ) ,
+	forall(  (  member([R1,C1,Color1] , Adyacentes) , (not(member([R1,C1,Color],Capturados))) , not(sonOpuestos(Color1,Color)) ) ,
 		  ( notGuion(Color1) , encerrado(Board,[R1,C1,Color1] , [ [R,C,Color] | Capturados ] , Aeliminar ) )   )    .
 
 
@@ -116,12 +116,12 @@ dentroDelTablero(R,C):-
 	C<19 .
 	
 sonOpuestos(Color1,Color2):-
-	Color1 = w,
-	Color2 = b.
+	Color1 = "w",
+	Color2 = "b".
 	
 sonOpuestos(Color1,Color2):-
-	Color1 = b,
-	Color2 = w.
+	Color1 = "b",
+	Color2 = "w".
 
 
 notGuion(Color):-

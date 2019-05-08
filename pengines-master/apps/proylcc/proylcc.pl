@@ -34,12 +34,12 @@ emptyBoard([
 % RBoard es la configuración resultante de reflejar la movida del jugador Player
 % en la posición Pos a partir de la configuración Board.
 
-goMove(Board, Player, [R,C], RBoard):-
-    replace(Row, R, NRow, Board, RBoard),
+goMove(Board, Player, [R,C], Board2):-
+    replace(Row, R, NRow, Board, Board1),
     replace("-", C, Player, Row, NRow),
-	
-	not(encerrado(RBoard ,[R,C,Player] , Aeliminar )). %una vez colocada la ficha, verifico que esta no haya quedado encerrada, es decir, que no se haya suicidado.
-
+	not(encerrado(Board1 ,[R,C,Player] , _ )), %una vez colocada la ficha, verifico que esta no haya quedado encerrada, es decir, que no se haya suicidado.
+	adyacentes(Board1 , [R,C] , Adyacentes), %pido la lista de adyacentes a la ficha colocada, y verifico si capturó a alguno de sus adyacentes.
+	eliminarCapturadosEnAdyacentes(Board1 , Adyacentes , Board2).
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
 % replace(?X, +XIndex, +Y, +Xs, -XsY)
@@ -55,6 +55,25 @@ replace(X, XIndex, Y, [Xi|Xs], [Xi|XsY]):-
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+eliminarCapturadosEnAdyacentes(Board , [] , Board).
+
+eliminarCapturadosEnAdyacentes(Board , [ [R,C,Color] | Adyacentes ] , Board2):-
+	encerrado(Board , [R,C,Color] , Capturados),
+	eliminarCapturados(Board , Capturados , Board1),
+	eliminarCapturadosEnAdyacentes(Board1 , Adyacentes , Board2).
+	
+eliminarCapturadosEnAdyacentes(Board , [ [R,C,Color] | Adyacentes ] , Board1):-
+	not(encerrado(Board , [R,C,Color] , _ )),
+	eliminarCapturadosEnAdyacentes(Board , Adyacentes , Board1).	
+
+
+
+eliminarCapturados(Board, [] ,Board).
+
+eliminarCapturados(Board,[ [R,C,Color] | Capturados ],Board2):-
+	replace(Row, R, NRow, Board, Board1),
+    replace(Color, C, "-", Row, NRow),
+	eliminarCapturados(Board1 , Capturados , Board2).
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -87,7 +106,8 @@ locked(Board , [ [Ra,Ca,ColorA] | Adyacentes] , [R,C,Color] , Visitados , Aelimi
 	locked(Board , 	Adyacentes , [R,C,Color] , Visitados , Aeliminar).
 
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 adyacentes(Board,[R,C],Lvalida):-
 	C1 is C-1,
 	C2 is C+1,

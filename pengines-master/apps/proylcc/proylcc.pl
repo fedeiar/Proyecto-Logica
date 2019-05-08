@@ -37,9 +37,11 @@ emptyBoard([
 goMove(Board, Player, [R,C], Board2):-
     replace(Row, R, NRow, Board, Board1),
     replace("-", C, Player, Row, NRow),
-	not(encerrado(Board1 ,[R,C,Player] , _ )), %una vez colocada la ficha, verifico que esta no haya quedado encerrada, es decir, que no se haya suicidado.
-	adyacentes(Board1 , [R,C] , Adyacentes), %pido la lista de adyacentes a la ficha colocada, y verifico si capturó a alguno de sus adyacentes.
-	eliminarCapturadosEnAdyacentes(Board1 , Adyacentes , Board2).
+	adyacentes(Board1 , [R,C] , Adyacentes), %pido la lista de adyacentes a la ficha colocada.
+	eliminarCapturadosEnAdyacentes(Board1 , Adyacentes , Board2), %verifico si alguien en la lista de adyacentes esta capturado,
+																  %y elimino a los grupos de capturados.
+	not(encerrado(Board2 ,[R,C,Player] , _ )). %una vez colocada la ficha, verifico que esta no haya quedado encerrada, es decir, que no se haya suicidado.
+	
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
 % replace(?X, +XIndex, +Y, +Xs, -XsY)

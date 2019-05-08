@@ -57,26 +57,59 @@ replace(X, XIndex, Y, [Xi|Xs], [Xi|XsY]):-
 
 
 
-
-encerrado(Board, [R,C,Color] , Capturados , [ [R,C,Color] | Capturados ]):-
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% encerrado funciona como una cascara para obtener la primer lista de adyacentes en locked.
+encerrado(Board,  [R,C,Color] , Aeliminar):-
 	adyacentes(Board , [R,C] , Adyacentes),
-	forall( (  member([R1,C1,Color1] , Adyacentes) , not(member([R1,C1,Color1] , Capturados))  ) ,
-			   sonOpuestos(Color1,Color) ).
+    locked(Board , Adyacentes , [R,C,Color] , [] , Aeliminar).
+
+
+locked( _ , [ [_,_,ColorA] | [] ] , [R,C,Color] , Visitados , [ [R,C,Color] | Visitados ] ):-
+	not(member([R,C,Color] , Visitados)),
+	sonOpuestos(ColorA,Color).
+
+locked( _ , [ [_,_,ColorA] | [] ] , [R,C,Color] , Visitados , Visitados ):-
+	member([R,C,Color] , Visitados),
+	sonOpuestos(ColorA,Color).
+
+locked(Board , [ [_,_,ColorA] | Adyacentes ] , [R,C,Color] , Visitados , Aeliminar):-
+	Adyacentes \= [],
+	sonOpuestos(ColorA,Color),
+	locked(Board, Adyacentes , [R,C,Color] , Visitados , Aeliminar).
 	
-	
-	
-encerrado(Board,  [R,C,Color] , Capturados , [ [R,C,Color] | Aeliminar ]):-
-	adyacentes(Board , [R,C] , Adyacentes),
-	forall(  (  member([R1,C1,Color1] , Adyacentes) , (not(member([R1,C1,Color],Capturados))) , not(sonOpuestos(Color1,Color)) ) ,
-		  ( notGuion(Color1) , encerrado(Board,[R1,C1,Color1] , [ [R,C,Color] | Capturados ] , Aeliminar ) )   )    .
+ 
+locked(Board , [ [Ra,Ca,ColorA] | [] ] , [R,C,Color] , Visitados , Aeliminar ):-
+	Color = ColorA,
+	not(member([Ra,Ca,ColorA] , Visitados)),
+	adyacentes(Board , [Ra,Ca] , AdyacentesA),
+	locked(Board , AdyacentesA , [Ra,Ca,ColorA] , [ [R,C,Color] | Visitados ] , Aeliminar). %si era el ultimo adyacente que me quedaba ver de la lista,
+																							%y encontre que la ult. ficha es de mi mismo color, entonces
+																							%me agrego a visitados y pregunto por mi ficha adyacente.
+																							
+locked( _ , [ [Ra,Ca,ColorA] | [] ] , [R,C,Color] , Visitados , [ [R,C,Color] | Visitados ] ):-
+	Color = ColorA,
+	member([Ra,Ca,ColorA] , Visitados). %si la ult ficha que vi ya pertenecia a la lista de visitados, simplemente lo ignoro y me
+										%agrego a la lista de visitados (si se ejecuta este predicado probablemente sea el ultimo 
+										% en llamarse).
 
 
+locked(Board , [ [Ra,Ca,ColorA] | Adyacentes] , [R,C,Color] , Visitados , Aeliminar):-
+	Adyacentes \= [],
+	Color = ColorA,
+	not(member([Ra,Ca,ColorA] , Visitados)),
+	adyacentes(Board , [Ra,Ca] , AdyacentesA),
+	locked(Board , AdyacentesA , [Ra,Ca,ColorA] , [ [R,C,Color] | Visitados ] , Aeliminar1), 
+	locked(Board , 	Adyacentes , [R,C,Color] , Aeliminar1 , Aeliminar).    
+
+locked(Board , [ [Ra,Ca,ColorA] | Adyacentes] , [R,C,Color] , Visitados , Aeliminar):-
+	Adyacentes \= [],
+	Color = ColorA,
+	member([Ra,Ca,ColorA] , Visitados), %si ya pertenecia a la lista de visitados, lo ignoro y sigo preguntando por el resto de los adyacentes.
+	locked(Board , 	Adyacentes , [R,C,Color] , Visitados , Aeliminar).
 
 
-
-
-
-adyacentes(Board,[R,C],Lvalida):-
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+adyacentes(Board,[R,C],Lvalida):-	
 	C1 is C-1,
 	C2 is C+1,
 	R1 is R-1,

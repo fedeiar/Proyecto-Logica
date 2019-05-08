@@ -35,10 +35,10 @@ emptyBoard([
 % en la posición Pos a partir de la configuración Board.
 
 goMove(Board, Player, [R,C], RBoard):-
-	
     replace(Row, R, NRow, Board, RBoard),
     replace("-", C, Player, Row, NRow),
-	encerrado(Board , [R,C,Player] , [] , Rta).
+	
+	not(encerrado(RBoard ,[R,C,Player] , Aeliminar )). %una vez colocada la ficha, verifico que esta no haya quedado encerrada, es decir, que no se haya suicidado.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
@@ -64,12 +64,8 @@ encerrado(Board,  [R,C,Color] , Aeliminar):-
     locked(Board , Adyacentes , [R,C,Color] , [] , Aeliminar).
 
 
-locked( _ , [] , [R,C,Color] , Visitados , [ [R,C,Color] | Visitados ] ):-
-	not(member([R,C,Color] , Visitados)).
-	
+locked( _ , [] , [R,C,Color] , _ , [ [R,C,Color] | [] ] ).
 
-locked( _ , [] , [R,C,Color] , Visitados , Visitados ):-
-	member([R,C,Color] , Visitados).
 
 locked(Board , [ [_,_,ColorA] | Adyacentes ] , [R,C,Color] , Visitados , Aeliminar):-
 	sonOpuestos(ColorA,Color),
@@ -81,7 +77,9 @@ locked(Board , [ [Ra,Ca,ColorA] | Adyacentes] , [R,C,Color] , Visitados , Aelimi
 	not(member([Ra,Ca,ColorA] , Visitados)),
 	adyacentes(Board , [Ra,Ca] , AdyacentesA),
 	locked(Board , AdyacentesA , [Ra,Ca,ColorA] , [ [R,C,Color] | Visitados ] , Aeliminar1), 
-	locked(Board , 	Adyacentes , [R,C,Color] , Aeliminar1 , Aeliminar).    
+    append(Visitados,Aeliminar1,VisitadosYeliminados),
+	locked(Board , 	Adyacentes , [R,C,Color] , VisitadosYeliminados , Aeliminar2),
+	append(Aeliminar1,Aeliminar2,Aeliminar).
 
 locked(Board , [ [Ra,Ca,ColorA] | Adyacentes] , [R,C,Color] , Visitados , Aeliminar):-
 	Color = ColorA,
@@ -93,8 +91,8 @@ locked(Board , [ [Ra,Ca,ColorA] | Adyacentes] , [R,C,Color] , Visitados , Aelimi
 adyacentes(Board,[R,C],Lvalida):-
 	C1 is C-1,
 	C2 is C+1,
-	R2 is R-1,
 	R1 is R+1,
+	R2 is R-1,
 	ficha(Board,R2,C,Fup),
 	ficha(Board,R1,C,Fdown),
 	ficha(Board,R,C1,Fleft),
@@ -102,15 +100,16 @@ adyacentes(Board,[R,C],Lvalida):-
 	LAdyacentes = [ [R2,C,Fup] , [R1,C,Fdown] , [R,C1,Fleft] , [R,C2,Fright] ],
 	adyacentesValidos(LAdyacentes,Lvalida).
 	
-adyacentesValidos([],[]).
+adyacentesValidos([],[]).	
 	
-adyacentesValidos([ [_,_,Color] | Lad ] , [ [_,_,Color] | LNueva ]):-
+adyacentesValidos([ [R,C,Color] | Lad ] , [ [R,C,Color] | LNueva ]):-
 	Color \= ".",
 	adyacentesValidos(Lad,LNueva).
 
 adyacentesValidos([ [_,_,Color] | Lad ] , LNueva):-
 	Color = ".",
 	adyacentesValidos(Lad,LNueva).
+
 
 % Obtiene el elemento del tablero que esta en la posicion [R,C] de la matriz.	
 % Si la posicion solicitada esta fuera del limite, la ficha sera un "." indicando que se salio del tablero.

@@ -5,6 +5,16 @@
 	]).
 
 emptyBoard([
+		 ["-","-","-","-","-","-","-","-","-","-","-","-","-","b","b","b","b","b","-"],
+		 ["-","-","-","-","-","-","-","-","-","-","-","-","b","w","w","w","w","w","b"],
+		 ["-","-","-","-","-","-","-","-","-","-","-","-","b","w","-","-","-","w","b"],
+		 ["-","-","-","-","-","-","-","-","-","-","-","-","b","w","w","w","w","w","b"],
+		 ["-","-","-","-","-","-","-","-","-","-","-","-","-","b","b","b","b","b","-"],
+		 ["-","-","-","-","-","-","-","-","-","-","-","-","-","-","-","-","-","-","-"],
+		 ["-","-","-","-","-","-","b","b","-","-","-","-","-","-","-","-","-","-","-"],
+		 ["-","-","-","-","-","-","-","w","b","-","-","-","-","-","-","b","w","-","-"],
+		 ["-","-","-","-","-","-","b","b","-","-","-","-","-","-","b","-","-","w","-"],
+		 ["-","-","-","-","-","-","-","-","-","-","-","-","-","-","-","b","w","-","-"],
 		 ["-","-","-","-","-","-","-","-","-","-","-","-","-","-","-","-","-","-","-"],
 		 ["-","-","-","-","-","-","-","-","-","-","-","-","-","-","-","-","-","-","-"],
 		 ["-","-","-","-","-","-","-","-","-","-","-","-","-","-","-","-","-","-","-"],
@@ -13,17 +23,7 @@ emptyBoard([
 		 ["-","-","-","-","-","-","-","-","-","-","-","-","-","-","-","-","-","-","-"],
 		 ["-","-","-","-","-","-","-","-","-","-","-","-","-","-","-","-","-","-","-"],
 		 ["-","-","-","-","-","-","-","-","-","-","-","-","-","-","-","-","-","-","-"],
-		 ["-","-","-","-","-","-","-","-","-","-","-","-","-","-","-","-","-","-","-"],
-		 ["-","-","-","-","-","-","-","-","-","-","-","-","-","-","-","-","-","-","-"],
-		 ["-","-","-","-","-","-","-","-","-","-","-","-","-","-","-","-","-","-","-"],
-		 ["-","-","-","-","-","-","-","-","-","-","-","-","-","-","-","-","-","-","-"],
-		 ["-","-","-","-","-","-","-","-","-","-","-","-","-","-","-","-","-","-","-"],
-		 ["-","-","-","-","-","-","-","-","-","-","-","-","-","-","-","-","-","-","-"],
-		 ["-","-","-","-","-","-","-","-","-","-","-","-","-","-","-","-","-","-","-"],
-		 ["-","-","-","-","-","-","-","-","-","-","-","-","-","-","-","-","-","-","-"],
-		 ["-","-","-","-","-","-","-","-","-","-","-","-","-","-","-","-","-","-","-"],
-		 ["-","-","-","-","-","-","-","-","-","-","-","-","-","-","-","-","-","-","-"],
-		 ["-","-","-","-","-","-","-","-","-","-","-","-","-","-","-","-","-","-","-"]
+		 ["-","-","-","-","-","-","-","-","-","-","-","-","-","-","-","-","-","-","b1"]
 		 ]).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -38,10 +38,12 @@ goMove(Board, Player, [R,C], Board2):-
     replace(Row, R, NRow, Board, Board1),
     replace("-", C, Player, Row, NRow),
 	adyacentes(Board1 , [R,C] , Adyacentes), %pido la lista de adyacentes a la ficha colocada.
-	eliminarCapturadosEnAdyacentes(Board1 , Adyacentes , Board2), %verifico si alguien en la lista de adyacentes esta capturado,
+	eliminarCapturadosEnAdyacentes(Board1 , Player , Adyacentes , Board2), %verifico si alguien en la lista de adyacentes esta capturado,
 																  %y elimino a los grupos de capturados.
 	not(encerrado(Board2 ,[R,C,Player] , _ )). %una vez colocada la ficha, verifico que esta no haya quedado encerrada, es decir, que no se haya suicidado.
-	
+
+
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
 % replace(?X, +XIndex, +Y, +Xs, -XsY)
@@ -54,19 +56,28 @@ replace(X, XIndex, Y, [Xi|Xs], [Xi|XsY]):-
     XIndexS is XIndex - 1,
     replace(X, XIndexS, Y, Xs, XsY).
 
+
+reemplazar("b1","-").
+reemplazar("w1","-").
+reemplazar("-","-").
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-eliminarCapturadosEnAdyacentes(Board , [] , Board).
+eliminarCapturadosEnAdyacentes(Board , _ , [] , Board).
 
-eliminarCapturadosEnAdyacentes(Board , [ [R,C,Color] | Adyacentes ] , Board2):-
-	encerrado(Board , [R,C,Color] , Capturados),
+eliminarCapturadosEnAdyacentes(Board , Color , [ [R,C,ColorA] | Adyacentes ] , Board2):-
+	sonOpuestos(Color,ColorA),
+	encerrado(Board , [R,C,ColorA] , Capturados),
 	eliminarCapturados(Board , Capturados , Board1),
-	eliminarCapturadosEnAdyacentes(Board1 , Adyacentes , Board2).
+	eliminarCapturadosEnAdyacentes(Board1 , Color , Adyacentes , Board2).
 	
-eliminarCapturadosEnAdyacentes(Board , [ [R,C,Color] | Adyacentes ] , Board1):-
-	not(encerrado(Board , [R,C,Color] , _ )),
-	eliminarCapturadosEnAdyacentes(Board , Adyacentes , Board1).	
+eliminarCapturadosEnAdyacentes(Board , Color , [ [_,_,ColorA] | Adyacentes ] , Board1):-
+	Color = ColorA,
+	eliminarCapturadosEnAdyacentes(Board , Color , Adyacentes , Board1).
+
+eliminarCapturadosEnAdyacentes(Board , Color , [ [R,C,ColorA] | Adyacentes ] , Board1):-
+	not(encerrado(Board , [R,C,ColorA] , _ )),
+	eliminarCapturadosEnAdyacentes(Board , Color , Adyacentes , Board1).	
 
 
 
@@ -78,7 +89,15 @@ eliminarCapturados(Board,[ [R,C,Color] | Capturados ],Board2):-
 	eliminarCapturados(Board1 , Capturados , Board2).
 
 
+colorAlternativo(Color,Simbolo):-
+	Color = "w",
+	Simbolo = "w1".
+	
+colorAlternativo(Color,Simbolo):-
+	Color = "b",
+	Simbolo = "b1".	
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 % encerrado funciona como una cascara para obtener la primer lista de adyacentes en locked.
 encerrado(Board,  [R,C,Color] , Aeliminar):-
 	adyacentes(Board , [R,C] , Adyacentes),

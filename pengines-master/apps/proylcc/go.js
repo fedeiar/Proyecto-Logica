@@ -9,6 +9,7 @@ var cellElems;
 var turnBlack = false;
 var bodyElem;
 var latestStone;
+var contadorTurno=0;
 
 
 
@@ -18,7 +19,7 @@ var latestStone;
 */
 
 function init() {
-    document.getElementById("passBtn").addEventListener('click', () => switchTurn());
+    document.getElementById("passBtn").addEventListener('click', () => passTurn());
     bodyElem = document.getElementsByTagName('body')[0];
     createBoard();
     // Creación de un conector (interface) para comunicarse con el servidor de Prolog.
@@ -73,7 +74,8 @@ function handleCreate() {
  */
 
 function handleSuccess(response) {
-    gridData = response.data[0].Board;
+    
+	gridData = response.data[0].Board;
     for (let row = 0; row < gridData.length; row++)
         for (let col = 0; col < gridData[row].length; col++) {
             cellElems[row][col].className = "gridCell" +
@@ -81,6 +83,7 @@ function handleSuccess(response) {
                 (latestStone && row === latestStone[0] && col === latestStone[1] ? " latest" : "");
         }
     switchTurn();
+	contadorTurno === 0;
 }
 
 /**
@@ -90,6 +93,35 @@ function handleSuccess(response) {
 function handleFailure() {
     alert("Invalid move!");
 }
+/**
+* Called when one player pass his turn.	
+* If both player pass, the match ends.
+*/
+
+function passTurn(){
+	
+	if(contadorTurno == 1){
+/* FALTARIA PEDIR EL PUNTAJE DE CADA COLOR Y VER QUE SALIDA TENDRIAMOS QUE DAR.
+*  Creo que para pedir el puntaje de los colores hay que hace asi:
+	
+	const negro = "puntaje("+"b"+","+ puntajeNegro+")";
+	penguine.ask(negro);
+	const blanco = "puntaje("+"w"+","+ puntajeBlanco+")";
+	penguine.ask(blanco);
+	
+	
+	Y ya tendriamos en las variables puntajeNegro y puntajeBlanco los dos puntajes.
+	
+*/
+		alert("Finalizo la partida, el ganador es:");
+		contadorTurno=2;
+	}
+	else {
+		contadorTurno = 1;
+		switchTurn();
+	}
+}
+
 
 /**
  * Handler for color click. Ask query to Pengines server.

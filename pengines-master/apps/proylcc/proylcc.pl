@@ -158,10 +158,10 @@ territorioCapturado(Board , Color , [R,C,"-"] , [ [Ra,Ca,FichaA] | Adyacentes ] 
 
 % Si encontramos un guion en VisitadosPrevios, quiere decir que este conjunto de guiones no esta capturado y el puntaje debe ser 0,
 % por lo tanto se inicializa flag y en la cascara se sabra que puntaje debe ser 0.
-territorioCapturado( _ , _ , [R,C,"-"] , [ [Ra,Ca,FichaA] | Adyacentes ] , VisitadosPrevios , VisitadosActuales , [ [R,C,Ficha] | VisitadosActuales ] , 0 , init ):-
+territorioCapturado( _ , _ , [R,C,"-"] , [ [Ra,Ca,FichaA] | Adyacentes ] , VisitadosPrevios , _ , [ [R,C,Ficha] | [] ] , 0 , init ):-
 	member( [Ra,Ca,FichaA] , VisitadosPrevios ).
 	
-territorioCapturado( _ , Color , [R,C,"-"] , [ [_,_,FichaA] | Adyacentes ] , _ , VisitadosActuales , [ [R,C,Ficha] | VisitadosActuales ] , 0 , init):-
+territorioCapturado( _ , Color , [R,C,"-"] , [ [_,_,FichaA] | Adyacentes ] , _ , _ , [ [R,C,Ficha] | [] ] , 0 , init):-
 	sonOpuestos( Color , FichaA ).
 
 %% El metodo devuelve la proxima fila y columna a visitar.

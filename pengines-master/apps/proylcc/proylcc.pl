@@ -135,6 +135,9 @@ territorioCapturado(Board , Color , [R,C,"-"] , [ [Ra,Ca,FichaA] | Adyacentes ] 
 	territorioCapturado(Board , Color , [R,C,"-"] , Adyacentes , VisitadosPrevios , VisitadosActuales , NuevosVisitados , SubPuntaje).
 
 
+% en los proximos 3 predicados, se verifica que si uno de los subpuntajes es 0, quiere decir que el conjunto de guiones a mirar no esta encerrado,
+% entonces computamos la lista de visitados hasta el momento para luego guardarla en la lista de visitados original (es decir, la que se usa en recorrer),
+% y decimos que puntaje es 0.
 territorioCapturado(Board , Color , [R,C,"-"] , [ [Ra,Ca,FichaA] | Adyacentes ] , VisitadosPrevios , VisitadosActuales , NuevosVisitados , SubPuntaje):-
 	FichaA = "-",
 	not(member( [Ra,Ca,FichaA] , VisitadosPrevios ) ),

@@ -113,7 +113,7 @@ function passTurn(){
 	Y ya tendriamos en las variables puntajeNegro y puntajeBlanco los dos puntajes.
 	
 */
-		alert("Finalizo la partida, el ganador es:");
+		alert("Finalizo la partida, los puntajes son:");
 		contadorTurno=2;
 	}
 	else {

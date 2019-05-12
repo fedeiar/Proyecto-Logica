@@ -64,7 +64,7 @@ puntajeColor(Board, Color, Puntaje):-
 	
 % Recorre el tablero fijandose que "-" estan encerrados por un color dado.
 % Termino de recorrer el tabler, caso base.
-recorrer(Board, [R,C] , Color , _ , _ , 0):-
+recorrer(_, [R,C] , _ , _ , _ , 0):-
 	R = 19,
 	C = 19.
 
@@ -120,22 +120,22 @@ recorrer(Board, [R,C], Color, Visitados , Puntaje):-
 
 
 % C.B: Si verifique que soy un guion capturado por fichas del mismo color, entonces sumo 1 al puntaje.
-territorioCapturado( _ , _ , [R,C,"-"] , [] , _ , _ , [ [R,C,"-"] | [] ] ,  1 , _ ). 
+territorioCapturado( _ , _ , [R,C,"-"] , [] , _ , _ , [ [R,C,"-"] | [] ] ,  1). 
 
-territorioCapturado(Board , Color , [R,C,"-"] , [ [_,_,FichaA] | Adyacentes ] , VisitadosPrevios , VisitadosActuales , NuevosVisitados  , SubPuntaje , _):-
+territorioCapturado(Board , Color , [R,C,"-"] , [ [_,_,FichaA] | Adyacentes ] , VisitadosPrevios , VisitadosActuales , NuevosVisitados  , SubPuntaje):-
 	Color = FichaA,
 	territorioCapturado(Board , Color , [R,C,"-"] , Adyacentes , 	VisitadosPrevios , VisitadosActuales , NuevosVisitados , SubPuntaje).
 
 
 
-territorioCapturado(Board , Color , [R,C,"-"] , [ [Ra,Ca,FichaA] | Adyacentes ] , VisitadosPrevios , VisitadosActuales , NuevosVisitados , SubPuntaje , _):-
+territorioCapturado(Board , Color , [R,C,"-"] , [ [Ra,Ca,FichaA] | Adyacentes ] , VisitadosPrevios , VisitadosActuales , NuevosVisitados , SubPuntaje ):-
 	FichaA = "-",
 	not(member( [Ra,Ca,FichaA] , VisitadosPrevios ) ),
 	member( [Ra,Ca,FichaA] , VisitadosActuales ),
 	territorioCapturado(Board , Color , [R,C,"-"] , Adyacentes , VisitadosPrevios , VisitadosActuales , NuevosVisitados , SubPuntaje).
 
 
-territorioCapturado(Board , Color , [R,C,"-"] , [ [Ra,Ca,FichaA] | Adyacentes ] , VisitadosPrevios , VisitadosActuales , NuevosVisitados , SubPuntaje , _):-
+territorioCapturado(Board , Color , [R,C,"-"] , [ [Ra,Ca,FichaA] | Adyacentes ] , VisitadosPrevios , VisitadosActuales , NuevosVisitados , SubPuntaje):-
 	FichaA = "-",
 	not(member( [Ra,Ca,FichaA] , VisitadosPrevios ) ),
 	not(member( [Ra,Ca,FichaA] , VisitadosActuales ) ),
@@ -148,35 +148,35 @@ territorioCapturado(Board , Color , [R,C,"-"] , [ [Ra,Ca,FichaA] | Adyacentes ] 
 	SubPuntaje2 > 0,
 	SubPuntaje is SubPuntaje1 + SubPuntaje2.
 
-territorioCapturado(Board , Color , [R,C,"-"] , [ [Ra,Ca,FichaA] | Adyacentes ] , VisitadosPrevios , VisitadosActuales , NuevosVisitados , SubPuntaje , _):-
+territorioCapturado(Board , Color , [R,C,"-"] , [ [Ra,Ca,FichaA] | Adyacentes ] , VisitadosPrevios , VisitadosActuales , NuevosVisitados , SubPuntaje):-
 	FichaA = "-",
 	not(member( [Ra,Ca,FichaA] , VisitadosPrevios ) ),
 	not(member( [Ra,Ca,FichaA] , VisitadosActuales ) ),
 	adyacentes(Board,[Ra,Ca],AdyacentesA),
 	territorioCapturado(Board , Color , [Ra,Ca,"-"] , AdyacentesA , VisitadosPrevios , [ [R,C,"-"] | VisitadosActuales ] , VisitadosEncerrados , SubPuntaje1),
 	append(VisitadosActuales , VisitadosEncerrados , VisitadosActuales1),
-	territorioCapturado(Board , Color , [R,C,"-"] , Adyacentes , VisitadosPrevios , VisitadosActuales1 , VisitadosEncerrados1 , SubPuntaje2),
+	territorioCapturado(Board , Color , [R,C,"-"] , Adyacentes , VisitadosPrevios , VisitadosActuales1 , VisitadosEncerrados1 , _ ),
 	append(VisitadosActuales1,VisitadosEncerrados1,NuevosVisitados),
 	SubPuntaje1 = 0,
-	SubPuntaje is 0
+	SubPuntaje is 0.
 	
-territorioCapturado(Board , Color , [R,C,"-"] , [ [Ra,Ca,FichaA] | Adyacentes ] , VisitadosPrevios , VisitadosActuales , NuevosVisitados , SubPuntaje , _):-
+territorioCapturado(Board , Color , [R,C,"-"] , [ [Ra,Ca,FichaA] | Adyacentes ] , VisitadosPrevios , VisitadosActuales , NuevosVisitados , SubPuntaje):-
 	FichaA = "-",
 	not(member( [Ra,Ca,FichaA] , VisitadosPrevios ) ),
 	not(member( [Ra,Ca,FichaA] , VisitadosActuales ) ),
 	adyacentes(Board,[Ra,Ca],AdyacentesA),
-	territorioCapturado(Board , Color , [Ra,Ca,"-"] , AdyacentesA , VisitadosPrevios , [ [R,C,"-"] | VisitadosActuales ] , VisitadosEncerrados , SubPuntaje1),
+	territorioCapturado(Board , Color , [Ra,Ca,"-"] , AdyacentesA , VisitadosPrevios , [ [R,C,"-"] | VisitadosActuales ] , VisitadosEncerrados , _ ),
 	append(VisitadosActuales , VisitadosEncerrados , VisitadosActuales1),
 	territorioCapturado(Board , Color , [R,C,"-"] , Adyacentes , VisitadosPrevios , VisitadosActuales1 , VisitadosEncerrados1 , SubPuntaje2),
 	append(VisitadosActuales1,VisitadosEncerrados1,NuevosVisitados),
 	SubPuntaje2 = 0,
-	SubPuntaje is 0
+	SubPuntaje is 0.
 % Si encontramos un guion en VisitadosPrevios, quiere decir que este conjunto de guiones no esta capturado y el puntaje debe ser 0,
 
-territorioCapturado( _ , _ , [R,C,"-"] , [ [Ra,Ca,FichaA] | Adyacentes ] , VisitadosPrevios , VisitadosActuales , [ [R,C,Ficha] | [] ] , 0 , init ):-
+territorioCapturado( _ , _ , [R,C,"-"] , [ [Ra,Ca,FichaA] | _ ] , VisitadosPrevios , _ , [ [R,C,"-"] | [] ] , 0):-
 	member( [Ra,Ca,FichaA] , VisitadosPrevios ).
 	
-territorioCapturado( _ , Color , [R,C,"-"] , [ [_,_,FichaA] | Adyacentes ] , _ , VisitadosActuales , [ [R,C,Ficha] | [] ] , 0 , init):-
+territorioCapturado( _ , Color , [R,C,"-"] , [ [_,_,FichaA] | _ ] , _ , _ , [ [R,C,"-"] | [] ] , 0):-
 	sonOpuestos( Color , FichaA ).
 
 %% El metodo devuelve la proxima fila y columna a visitar.

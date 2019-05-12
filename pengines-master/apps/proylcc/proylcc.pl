@@ -44,9 +44,8 @@ goMove(Board, Player, [R,C], Board2):-
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%
 % replace(?X, +XIndex, +Y, +Xs, -XsY)
-%
+
 
 replace(X, 0, Y, [X|Xs], [Y|Xs]).
 
@@ -109,8 +108,8 @@ recorrer(Board, [R,C], Color, Visitados , Puntaje):-
 	not(member([R,C,Ficha], Visitados)),
 	adyacentes(Board,[R,C],Adyacentes),
 	territorioCapturado(Board , Color , [R,C,Ficha] , Adyacentes ,  Visitados  , [] , NuevosVisitados , SubPuntajeTerritorio),
-	append( [ [R,C,Ficha] | Visitados ] , NuevosVisitados , VisitadosTotales),
-	siguiente(R1 , C1 , RNueva , CNueva ),
+	append( Visitados  , NuevosVisitados , VisitadosTotales),
+	siguiente(R , C , R1 , C1 ),
 	recorrer(Board, [R1,C1] , Color , VisitadosTotales , NPuntaje),
 	Puntaje is SubPuntajeTerritorio + NPuntaje.
 
@@ -119,38 +118,51 @@ recorrer(Board, [R,C], Color, Visitados , Puntaje):-
 %que necesariamente toque un guion de un conjunto de guiones que no cumple la condicion de estar encerrados, entonces automaticamente debo
 %devolver 0 y agregar a los nuevosVisitados todos aquellos guiones que encontré.
 
-% C.B: Si verifique que soy un guion capturado por fichas del mismo color, entonces sumo 1 al puntaje.
-territorioCapturado(_ , _ , [R,C,"-"] , [] , _ , VisitadosActuales , [ [R,C,"-"] | VisitadosActuales ] ,  1). 
+%la variable "Flag" si es inicializada, quiere decir que puntaje debe ser 0, si queda sin inicializar, entonces es el puntaje encontrado.
 
-territorioCapturado(Board , Color , [R,C,"-"] , [ [_,_,FichaA] | Adyacentes ] , VisitadosPrevios , VisitadosActuales , NuevosVisitados  , SubPuntaje):-
+territorioCascara(Board , Color , [R,C,Ficha] , Adyacentes ,  Visitados  , [] , NuevosVisitados , SubPuntajeTerritorio):-
+	territorioCapturado(Board , Color , [R,C,Ficha] , Adyacentes ,  Visitados  , [] , NuevosVisitados , SubPuntajeTerritorio , Flag),
+	var(Flag).
+
+territorioCascara(Board , Color , [R,C,Ficha] , Adyacentes ,  Visitados  , [] , NuevosVisitados , 0):-
+	territorioCapturado(Board , Color , [R,C,Ficha] , Adyacentes ,  Visitados  , [] , NuevosVisitados , _ , Flag),
+	var(Flag).
+
+
+% C.B: Si verifique que soy un guion capturado por fichas del mismo color, entonces sumo 1 al puntaje.
+territorioCapturado( _ , _ , [R,C,"-"] , [] , _ , _ , [ [R,C,"-"] | [] ] ,  1 , _ ). 
+
+territorioCapturado(Board , Color , [R,C,"-"] , [ [_,_,FichaA] | Adyacentes ] , VisitadosPrevios , VisitadosActuales , NuevosVisitados  , SubPuntaje , _):-
 	Color = FichaA,
 	territorioCapturado(Board , Color , [R,C,"-"] , Adyacentes , 	VisitadosPrevios , VisitadosActuales , NuevosVisitados , SubPuntaje).
 
 
 
-territorioCapturado(Board , Color , [R,C,"-"] , [ [Ra,Ca,FichaA] | Adyacentes ] , VisitadosPrevios , VisitadosActuales , NuevosVisitados , SubPuntaje):-
+territorioCapturado(Board , Color , [R,C,"-"] , [ [Ra,Ca,FichaA] | Adyacentes ] , VisitadosPrevios , VisitadosActuales , NuevosVisitados , SubPuntaje , _):-
 	FichaA = "-",
 	not(member( [Ra,Ca,FichaA] , VisitadosPrevios ) ),
 	member( [Ra,Ca,FichaA] , VisitadosActuales ),
 	territorioCapturado(Board , Color , [R,C,"-"] , Adyacentes , VisitadosPrevios , VisitadosActuales , NuevosVisitados , SubPuntaje).
 
 
-territorioCapturado(Board , Color , [R,C,"-"] , [ [Ra,Ca,FichaA] | Adyacentes ] , VisitadosPrevios , VisitadosActuales , NuevosVisitados , SubPuntaje):-
+territorioCapturado(Board , Color , [R,C,"-"] , [ [Ra,Ca,FichaA] | Adyacentes ] , VisitadosPrevios , VisitadosActuales , NuevosVisitados , SubPuntaje , _):-
 	FichaA = "-",
 	not(member( [Ra,Ca,FichaA] , VisitadosPrevios ) ),
 	not(member( [Ra,Ca,FichaA] , VisitadosActuales ) ),
 	adyacentes(Board,[Ra,Ca],AdyacentesA),
 	territorioCapturado(Board , Color , [Ra,Ca,"-"] , AdyacentesA , VisitadosPrevios , [ [R,C,"-"] | VisitadosActuales ] , VisitadosEncerrados , SubPuntaje1),
-	append(VisitadosActuales,VisitadosEncerrados, VisitadosActuales1),
+	append(VisitadosActuales , VisitadosEncerrados , VisitadosActuales1),
 	territorioCapturado(Board , Color , [R,C,"-"] , Adyacentes , VisitadosPrevios , VisitadosActuales1 , VisitadosEncerrados1 , SubPuntaje2),
 	append(VisitadosActuales1,VisitadosEncerrados1,NuevosVisitados),
 	SubPuntaje is SubPuntaje1 + SubPuntaje2.
 
-%si encontramos un guion en VisitadosPrevios, quiere decir que este conjunto de guiones no esta capturado y el puntaje debe ser 0.
-territorioCapturado( _ , _ , [R,C,"-"] , [ [Ra,Ca,FichaA] | Adyacentes ] , VisitadosPrevios , VisitadosActuales , [ [R,C,Ficha] | VisitadosActuales ] , 0):-
+% Si encontramos un guion en VisitadosPrevios, quiere decir que este conjunto de guiones no esta capturado y el puntaje debe ser 0,
+% por lo tanto se inicializa flag y en la cascara se sabra que puntaje debe ser 0.
+territorioCapturado( _ , _ , [R,C,"-"] , [ [Ra,Ca,FichaA] | Adyacentes ] , VisitadosPrevios , VisitadosActuales , [ [R,C,Ficha] | VisitadosActuales ] , 0 , init ):-
 	member( [Ra,Ca,FichaA] , VisitadosPrevios ).
 	
-
+territorioCapturado( _ , Color , [R,C,"-"] , [ [_,_,FichaA] | Adyacentes ] , _ , VisitadosActuales , [ [R,C,Ficha] | VisitadosActuales ] , 0 , init):-
+	sonOpuestos( Color , FichaA ).
 
 %% El metodo devuelve la proxima fila y columna a visitar.
 %% Si no hay mas que recorrer devuelve R=20, C=20.	
@@ -175,7 +187,7 @@ siguiente(R, C, R1, C1):-
 	
 
 
-
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 eliminarCapturadosEnAdyacentes(Board , _ , [] , Board).
@@ -204,7 +216,8 @@ eliminarCapturados(Board,[ [R,C,Color] | Capturados ],Board2):-
 	eliminarCapturados(Board1 , Capturados , Board2).
 
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 % suicidio funciona como una cascara para obtener la primer lista de adyacentes en locked.
 suicidio(Board,  [R,C,Color] , Aeliminar):-
@@ -241,7 +254,8 @@ locked(Board , [ [Ra,Ca,ColorA] | Adyacentes] , [R,C,Color] , Visitados , Aelimi
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 adyacentes(Board,[R,C],Lvalida):-
 	C1 is C-1,

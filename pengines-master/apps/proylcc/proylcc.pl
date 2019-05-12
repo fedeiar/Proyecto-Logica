@@ -118,16 +118,6 @@ recorrer(Board, [R,C], Color, Visitados , Puntaje):-
 %que necesariamente toque un guion de un conjunto de guiones que no cumple la condicion de estar encerrados, entonces automaticamente debo
 %devolver 0 y agregar a los nuevosVisitados todos aquellos guiones que encontré.
 
-%la variable "Flag" si es inicializada, quiere decir que puntaje debe ser 0, si queda sin inicializar, entonces es el puntaje encontrado.
-
-territorioCascara(Board , Color , [R,C,Ficha] , Adyacentes ,  Visitados  , [] , NuevosVisitados , SubPuntajeTerritorio):-
-	territorioCapturado(Board , Color , [R,C,Ficha] , Adyacentes ,  Visitados  , [] , NuevosVisitados , SubPuntajeTerritorio , Flag),
-	var(Flag).
-
-territorioCascara(Board , Color , [R,C,Ficha] , Adyacentes ,  Visitados  , [] , NuevosVisitados , 0):-
-	territorioCapturado(Board , Color , [R,C,Ficha] , Adyacentes ,  Visitados  , [] , NuevosVisitados , _ , Flag),
-	var(Flag).
-
 
 % C.B: Si verifique que soy un guion capturado por fichas del mismo color, entonces sumo 1 al puntaje.
 territorioCapturado( _ , _ , [R,C,"-"] , [] , _ , _ , [ [R,C,"-"] | [] ] ,  1 , _ ). 
@@ -154,14 +144,39 @@ territorioCapturado(Board , Color , [R,C,"-"] , [ [Ra,Ca,FichaA] | Adyacentes ] 
 	append(VisitadosActuales , VisitadosEncerrados , VisitadosActuales1),
 	territorioCapturado(Board , Color , [R,C,"-"] , Adyacentes , VisitadosPrevios , VisitadosActuales1 , VisitadosEncerrados1 , SubPuntaje2),
 	append(VisitadosActuales1,VisitadosEncerrados1,NuevosVisitados),
+	SubPuntaje1 > 0,
+	SubPuntaje2 > 0,
 	SubPuntaje is SubPuntaje1 + SubPuntaje2.
 
+territorioCapturado(Board , Color , [R,C,"-"] , [ [Ra,Ca,FichaA] | Adyacentes ] , VisitadosPrevios , VisitadosActuales , NuevosVisitados , SubPuntaje , _):-
+	FichaA = "-",
+	not(member( [Ra,Ca,FichaA] , VisitadosPrevios ) ),
+	not(member( [Ra,Ca,FichaA] , VisitadosActuales ) ),
+	adyacentes(Board,[Ra,Ca],AdyacentesA),
+	territorioCapturado(Board , Color , [Ra,Ca,"-"] , AdyacentesA , VisitadosPrevios , [ [R,C,"-"] | VisitadosActuales ] , VisitadosEncerrados , SubPuntaje1),
+	append(VisitadosActuales , VisitadosEncerrados , VisitadosActuales1),
+	territorioCapturado(Board , Color , [R,C,"-"] , Adyacentes , VisitadosPrevios , VisitadosActuales1 , VisitadosEncerrados1 , SubPuntaje2),
+	append(VisitadosActuales1,VisitadosEncerrados1,NuevosVisitados),
+	SubPuntaje1 = 0,
+	SubPuntaje is 0
+	
+territorioCapturado(Board , Color , [R,C,"-"] , [ [Ra,Ca,FichaA] | Adyacentes ] , VisitadosPrevios , VisitadosActuales , NuevosVisitados , SubPuntaje , _):-
+	FichaA = "-",
+	not(member( [Ra,Ca,FichaA] , VisitadosPrevios ) ),
+	not(member( [Ra,Ca,FichaA] , VisitadosActuales ) ),
+	adyacentes(Board,[Ra,Ca],AdyacentesA),
+	territorioCapturado(Board , Color , [Ra,Ca,"-"] , AdyacentesA , VisitadosPrevios , [ [R,C,"-"] | VisitadosActuales ] , VisitadosEncerrados , SubPuntaje1),
+	append(VisitadosActuales , VisitadosEncerrados , VisitadosActuales1),
+	territorioCapturado(Board , Color , [R,C,"-"] , Adyacentes , VisitadosPrevios , VisitadosActuales1 , VisitadosEncerrados1 , SubPuntaje2),
+	append(VisitadosActuales1,VisitadosEncerrados1,NuevosVisitados),
+	SubPuntaje2 = 0,
+	SubPuntaje is 0
 % Si encontramos un guion en VisitadosPrevios, quiere decir que este conjunto de guiones no esta capturado y el puntaje debe ser 0,
-% por lo tanto se inicializa flag y en la cascara se sabra que puntaje debe ser 0.
-territorioCapturado( _ , _ , [R,C,"-"] , [ [Ra,Ca,FichaA] | Adyacentes ] , VisitadosPrevios , _ , [ [R,C,Ficha] | [] ] , 0 , init ):-
+
+territorioCapturado( _ , _ , [R,C,"-"] , [ [Ra,Ca,FichaA] | Adyacentes ] , VisitadosPrevios , VisitadosActuales , [ [R,C,Ficha] | [] ] , 0 , init ):-
 	member( [Ra,Ca,FichaA] , VisitadosPrevios ).
 	
-territorioCapturado( _ , Color , [R,C,"-"] , [ [_,_,FichaA] | Adyacentes ] , _ , _ , [ [R,C,Ficha] | [] ] , 0 , init):-
+territorioCapturado( _ , Color , [R,C,"-"] , [ [_,_,FichaA] | Adyacentes ] , _ , VisitadosActuales , [ [R,C,Ficha] | [] ] , 0 , init):-
 	sonOpuestos( Color , FichaA ).
 
 %% El metodo devuelve la proxima fila y columna a visitar.

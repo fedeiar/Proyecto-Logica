@@ -40,8 +40,7 @@ goMove(Board, Player, [R,C], Board2):-
 	adyacentes(Board1 , [R,C] , Adyacentes), %pido la lista de adyacentes a la ficha colocada.
 	eliminarCapturadosEnAdyacentes(Board1 , Player , Adyacentes , Board2), %verifico si alguien en la lista de adyacentes esta capturado,
 																  %y elimino a los grupos de capturados.
-	not(encerrado(Board2 ,[R,C,Player] , _ )). %una vez colocada la ficha, verifico que esta no haya quedado encerrada, es decir, que no se haya suicidado.
-
+	not(suicidio(Board2 ,[R,C,Player] , _ )). %una vez colocada la ficha, verifico que esta no haya quedado encerrada, es decir, que no se haya suicidado.
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -56,18 +55,22 @@ replace(X, XIndex, Y, [Xi|Xs], [Xi|XsY]):-
     XIndexS is XIndex - 1,
     replace(X, XIndexS, Y, Xs, XsY).
 
-
-reemplazar("b1","-").
-reemplazar("w1","-").
-reemplazar("-","-").
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+	
+	
+
+
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 eliminarCapturadosEnAdyacentes(Board , _ , [] , Board).
 
 eliminarCapturadosEnAdyacentes(Board , Color , [ [R,C,ColorA] | Adyacentes ] , Board2):-
 	sonOpuestos(Color,ColorA),
-	encerrado(Board , [R,C,ColorA] , Capturados),
+	suicidio(Board , [R,C,ColorA] , Capturados),
 	eliminarCapturados(Board , Capturados , Board1),
 	eliminarCapturadosEnAdyacentes(Board1 , Color , Adyacentes , Board2).
 	
@@ -76,7 +79,7 @@ eliminarCapturadosEnAdyacentes(Board , Color , [ [_,_,ColorA] | Adyacentes ] , B
 	eliminarCapturadosEnAdyacentes(Board , Color , Adyacentes , Board1).
 
 eliminarCapturadosEnAdyacentes(Board , Color , [ [R,C,ColorA] | Adyacentes ] , Board1):-
-	not(encerrado(Board , [R,C,ColorA] , _ )),
+	not(suicidio(Board , [R,C,ColorA] , _ )),
 	eliminarCapturadosEnAdyacentes(Board , Color , Adyacentes , Board1).	
 
 
@@ -89,17 +92,10 @@ eliminarCapturados(Board,[ [R,C,Color] | Capturados ],Board2):-
 	eliminarCapturados(Board1 , Capturados , Board2).
 
 
-colorAlternativo(Color,Simbolo):-
-	Color = "w",
-	Simbolo = "w1".
-	
-colorAlternativo(Color,Simbolo):-
-	Color = "b",
-	Simbolo = "b1".	
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-% encerrado funciona como una cascara para obtener la primer lista de adyacentes en locked.
-encerrado(Board,  [R,C,Color] , Aeliminar):-
+% suicidio funciona como una cascara para obtener la primer lista de adyacentes en locked.
+suicidio(Board,  [R,C,Color] , Aeliminar):-
 	adyacentes(Board , [R,C] , Adyacentes),
     locked(Board , Adyacentes , [R,C,Color] , [] , Aeliminar).
 

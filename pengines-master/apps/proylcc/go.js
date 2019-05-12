@@ -83,7 +83,7 @@ function handleSuccess(response) {
                 (latestStone && row === latestStone[0] && col === latestStone[1] ? " latest" : "");
         }
     switchTurn();
-	contadorTurno === 0;
+	contadorTurno = 0;
 }
 
 /**

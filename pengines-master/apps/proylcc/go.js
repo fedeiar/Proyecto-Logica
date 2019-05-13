@@ -95,26 +95,31 @@ function handleSuccess(response) {
 		
 	}
 	else{
-		alert("Entro");
+		
 		if(response.data[0].Puntaje !== undefined){
 			
 			if(puntajeBlanco === -1){
+			
 				puntajeBlanco = response.data[0].Puntaje;
-				const s = "puntajeColor(" + Pengine.stringify(gridData) + ",b, Puntaje)";
+				const s = "puntajeColor(" + Pengine.stringify(gridData) + ","+ Pengine.stringify("b")+", Puntaje)";
 				pengine.ask(s);
+				
 			}else{
+				
 				puntajeNegro = response.data[0].Puntaje;
-				alert("Finalizo la partida, los puntajes son:"+ PuntajeBlanco +"---"+ PuntajeNegro);
+				
+				if(puntajeNegro ==puntajeBlanco){
+					alert("La partida finalizo y termino empatada, el puntaje de ambos fue: "+ puntajeBlanco);				
+				}
+				else {
+					var ganador = (puntajeBlanco>puntajeNegro ? "Blanco" : "Negro");
+					alert("El ganador es "+ ganador + " \nEl puntaje del Blanco es: "+ puntajeBlanco + " Y el puntaje del negro es :" +  puntajeNegro);
+				}
 			}
-			
-			
-			
-			
+				
 			
 		}
 	}
-	console.log("sigo");
-    
 	
 	contadorTurno = 0;
 }
@@ -134,18 +139,7 @@ function handleFailure() {
 function passTurn(){
 	
 	if(contadorTurno == 1){
-/* FALTARIA PEDIR EL PUNTAJE DE CADA COLOR Y VER QUE SALIDA TENDRIAMOS QUE DAR.
-*  Creo que para pedir el puntaje de los colores hay que hace asi:
-	
-	const negro = "puntaje("+"b"+","+ puntajeNegro+")";
-	penguine.ask(negro);
-	const blanco = "puntaje("+"w"+","+ puntajeBlanco+")";
-	penguine.ask(blanco);
-	
-	
-	Y ya tendriamos en las variables puntajeNegro y puntajeBlanco los dos puntajes.
-	
-*/
+
 		const s = "puntajeColor(" + Pengine.stringify(gridData) + ","+ Pengine.stringify("w")+", Puntaje)";
 		console.log(s);
 		pengine.ask(s);
@@ -154,7 +148,6 @@ function passTurn(){
 		contadorTurno=2;
 	}
 	else {
-		console.log("primer pass");
 		contadorTurno = 1;
 		switchTurn();
 	}

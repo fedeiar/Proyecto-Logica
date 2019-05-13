@@ -11,6 +11,9 @@ var bodyElem;
 var latestStone;
 var contadorTurno=0;
 
+var puntajeNegro = -1;
+var puntajeBlanco = -1;
+
 
 
 /**
@@ -67,6 +70,7 @@ function createBoard() {
 
 function handleCreate() {
     pengine.ask('emptyBoard(Board)');
+	
 }
 
 /**
@@ -74,15 +78,44 @@ function handleCreate() {
  */
 
 function handleSuccess(response) {
+	
+	console.log(response.data[0]);
+	
+	
+	if(response.data[0].Board !== undefined){
+		gridData = response.data[0].Board;
+		console.log(gridData);
+		for (let row = 0; row < gridData.length; row++)
+			for (let col = 0; col < gridData[row].length; col++) {
+				cellElems[row][col].className = "gridCell" +
+					(gridData[row][col] === "w" ? " stoneWhite" : gridData[row][col] === "b" ? " stoneBlack" : "") +
+					(latestStone && row === latestStone[0] && col === latestStone[1] ? " latest" : "");
+			}
+		switchTurn();
+		
+	}
+	else{
+		alert("Entro");
+		if(response.data[0].Puntaje !== undefined){
+			
+			if(puntajeBlanco === -1){
+				puntajeBlanco = response.data[0].Puntaje;
+				const s = "puntajeColor(" + Pengine.stringify(gridData) + ",b, Puntaje)";
+				pengine.ask(s);
+			}else{
+				puntajeNegro = response.data[0].Puntaje;
+				alert("Finalizo la partida, los puntajes son:"+ PuntajeBlanco +"---"+ PuntajeNegro);
+			}
+			
+			
+			
+			
+			
+		}
+	}
+	console.log("sigo");
     
-	gridData = response.data[0].Board;
-    for (let row = 0; row < gridData.length; row++)
-        for (let col = 0; col < gridData[row].length; col++) {
-            cellElems[row][col].className = "gridCell" +
-                (gridData[row][col] === "w" ? " stoneWhite" : gridData[row][col] === "b" ? " stoneBlack" : "") +
-                (latestStone && row === latestStone[0] && col === latestStone[1] ? " latest" : "");
-        }
-    switchTurn();
+	
 	contadorTurno = 0;
 }
 
@@ -113,10 +146,15 @@ function passTurn(){
 	Y ya tendriamos en las variables puntajeNegro y puntajeBlanco los dos puntajes.
 	
 */
-		alert("Finalizo la partida, los puntajes son:");
+		const s = "puntajeColor(" + Pengine.stringify(gridData) + ","+ Pengine.stringify("w")+", Puntaje)";
+		console.log(s);
+		pengine.ask(s);
+		
+		
 		contadorTurno=2;
 	}
 	else {
+		console.log("primer pass");
 		contadorTurno = 1;
 		switchTurn();
 	}

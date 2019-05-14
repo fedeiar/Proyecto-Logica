@@ -109,12 +109,16 @@ function handleSuccess(response) {
 				puntajeNegro = response.data[0].Puntaje;
 				
 				if(puntajeNegro ==puntajeBlanco){
-					alert("La partida finalizo y termino empatada, el puntaje de ambos fue: "+ puntajeBlanco);				
+					alert("La partida finalizo en empate, el puntaje de ambos fue: "+ puntajeBlanco);				
 				}
 				else {
 					var ganador = (puntajeBlanco>puntajeNegro ? "Blanco" : "Negro");
-					alert("El ganador es "+ ganador + " \nEl puntaje del Blanco es: "+ puntajeBlanco + " Y el puntaje del negro es :" +  puntajeNegro);
+					alert("El ganador es "+ ganador + " \nEl puntaje del Blanco es: "+ puntajeBlanco + "\nEl puntaje del Negro es :" +  puntajeNegro);
 				}
+				puntajeBlanco = -1;
+				puntajeNegro = -1;
+				pengine.ask('emptyBoard(Board)');
+				
 			}
 				
 			

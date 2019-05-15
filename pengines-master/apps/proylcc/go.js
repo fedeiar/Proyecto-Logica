@@ -79,12 +79,8 @@ function handleCreate() {
 
 function handleSuccess(response) {
 	
-	console.log(response.data[0]);
-	
-	
 	if(response.data[0].Board !== undefined){
 		gridData = response.data[0].Board;
-		console.log(gridData);
 		for (let row = 0; row < gridData.length; row++)
 			for (let col = 0; col < gridData[row].length; col++) {
 				cellElems[row][col].className = "gridCell" +
@@ -145,7 +141,6 @@ function passTurn(){
 	if(contadorTurno == 1){
 
 		const s = "puntajeColor(" + Pengine.stringify(gridData) + ","+ Pengine.stringify("w")+", Puntaje)";
-		console.log(s);
 		pengine.ask(s);
 		
 		

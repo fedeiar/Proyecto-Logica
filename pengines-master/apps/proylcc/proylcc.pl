@@ -37,10 +37,10 @@ emptyBoard([
 goMove(Board, Player, [R,C], Board2):-
     replace(Row, R, NRow, Board, Board1),
     replace("-", C, Player, Row, NRow),
-	adyacentes(Board1 , [R,C] , Adyacentes), %pido la lista de adyacentes a la ficha colocada.
-	eliminarCapturadosEnAdyacentes(Board1 , Player , Adyacentes , Board2), %verifico si alguien en la lista de adyacentes esta capturado,
-																  %y elimino a los grupos de capturados.
-	not(suicidio(Board2 ,[R,C,Player] , _ )). %una vez colocada la ficha, verifico que esta no haya quedado encerrada, es decir, que no se haya suicidado.
+	adyacentes(Board1 , [R,C] , Adyacentes), % Pido la lista de adyacentes a la ficha colocada.
+	eliminarCapturadosEnAdyacentes(Board1 , Player , Adyacentes , Board2), % Verifico si alguien en la lista de adyacentes esta capturado,
+																		   % y elimino a los grupos de capturados.
+	not(suicidio(Board2 ,[R,C,Player] , _ )). % Una vez colocada la ficha, verifico que esta no haya quedado encerrada, es decir, que no se haya suicidado.
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -60,29 +60,29 @@ replace(X, XIndex, Y, [Xi|Xs], [Xi|XsY]):-
 %% Cascara para llamar desde el Javascript y devuelve el puntaje de un color.
  
 puntajeColor(Board, Color, Puntaje):-
-	not(vacio(Board, [0,0])),
+	not(vacio(Board , [0,0])),
 	recorrer(Board , [0,0] , Color , []  , Puntaje).
 
 puntajeColor(Board, _, 0):-
-	vacio(Board, [0,0]).
+	vacio(Board , [0,0]).
 	
 	
 
 % Chequea si el tablero esta vacio.
-vacio(_, [R,C]):-
-	R= 19,
-	C=19.
+vacio( _ , [R,C]):-
+	R = 19,
+	C = 19.
 	
 vacio(Board, [R,C]):-
-	ficha(Board, R, C ,Ficha),
+	ficha(Board, R , C , Ficha),
 	Ficha = "-",
-	siguiente(R ,C, R1, C1),
-	vacio(Board, [R1, C1]).
+	siguiente(R,C,R1,C1),
+	vacio(Board , [R1, C1]).
 	
 	
 % Recorre el tablero fijandose que "-" estan encerrados por un color dado.
 % Termino de recorrer el tabler, caso base.
-recorrer(_, [R,C] , _ , _ , 0):-
+recorrer( _ , [R,C] , _ , _ , 0):-
 	R = 19,
 	C = 19.
 
@@ -91,18 +91,18 @@ recorrer(_, [R,C] , _ , _ , 0):-
 recorrer(Board, [R,C], Color, Visitados , Puntaje):-
 	R \= 19,
 	C \= 19,
-	ficha(Board, R, C, Ficha),
+	ficha(Board ,R,C, Ficha),
 	sonOpuestos(Color,Ficha),
-	siguiente(R, C, R1, C1),
-	recorrer(Board, [R1, C1], Color, Visitados , Puntaje).
+	siguiente(R,C,R1,C1),
+	recorrer(Board , [R1, C1] , Color , Visitados , Puntaje).
 	
 recorrer(Board, [R,C], Color, Visitados , Puntaje):-
 	R \= 19,
 	C \= 19,
-	ficha(Board, R, C, Ficha),
+	ficha(Board, R,C, Ficha),
 	Color = Ficha,
-	siguiente(R, C, R1, C1),
-	recorrer(Board, [R1, C1], Color, Visitados , NPuntaje),
+	siguiente(R,C,R1,C1),
+	recorrer(Board , [R1, C1] , Color , Visitados , NPuntaje),
 	Puntaje is NPuntaje + 1.
 
 
@@ -111,42 +111,38 @@ recorrer(Board, [R,C], Color, Visitados , Puntaje):-
 recorrer(Board, [R,C], Color, Visitados , Puntaje):-
 	R \= 19,
 	C \= 19,
-	ficha(Board, R, C, Ficha),
+	ficha(Board, R,C, Ficha),
 	Ficha = "-",
 	member([R,C,Ficha], Visitados),
-	siguiente(R, C, R1, C1),
-	recorrer(Board, [R1,C1], Color , Visitados , Puntaje).
+	siguiente(R,C,R1,C1),
+	recorrer(Board, [R1,C1] , Color , Visitados , Puntaje).
 
 % Estas visitando un "-" que no fue visitado, chequear si esta encerrado o no. 
 recorrer(Board, [R,C], Color, Visitados , Puntaje):-
 	R \= 19,
 	C \= 19,
-	ficha(Board, R, C, Ficha),
+	ficha(Board, R,C, Ficha),
 	Ficha = "-",
 	not(member([R,C,Ficha], Visitados)),
 	adyacentes(Board,[R,C],Adyacentes),
 	territorioCapturado(Board , Color , [R,C,Ficha] , Adyacentes ,  Visitados  , [] , NuevosVisitados , SubPuntajeTerritorio),
 	append( Visitados  , NuevosVisitados , VisitadosTotales),
-	siguiente(R, C, R1, C1),
+	siguiente(R,C,R1,C1),
 	recorrer(Board, [R1,C1] , Color , VisitadosTotales , NPuntaje),
 	Puntaje is SubPuntajeTerritorio + NPuntaje.
 	
-	
+
 recorrer(Board, [R,C], Color, Visitados , Puntaje):-
 	R \= 19,
 	C \= 19,
-	ficha(Board, R, C, Ficha),
+	ficha(Board, R,C, Ficha),
 	Ficha = "-",
 	not(member([R,C,Ficha], Visitados)),
 	adyacentes(Board,[R,C],Adyacentes),
 	not(territorioCapturado(Board , Color , [R,C,Ficha] , Adyacentes ,  Visitados  , [] , _ , _)),
-	siguiente(R , C , R1 , C1 ),
+	siguiente(R,C,R1,C1),
 	recorrer(Board, [R1,C1] , Color , [ [R,C,Ficha] | Visitados ] , Puntaje).
 	    
-%en territorioCapturado, si llego a dar con una ficha (que va a ser un guion) que estaba en visitados (es decir, visitados previos), quiere decir
-%que necesariamente toque un guion de un conjunto de guiones que no cumple la condicion de estar encerrados, entonces automaticamente debo
-%devolver 0 y agregar a los nuevosVisitados todos aquellos guiones que encontré.
-
 
 % C.B: Si verifique que soy un guion capturado por fichas del mismo color, entonces sumo 1 al puntaje.
 territorioCapturado( _ , _ , [R,C,"-"] , [] , _ , _ , [ [R,C,"-"] | [] ] ,  1). 
@@ -164,9 +160,7 @@ territorioCapturado(Board , Color , [R,C,"-"] , [ [Ra,Ca,FichaA] | Adyacentes ] 
 	territorioCapturado(Board , Color , [R,C,"-"] , Adyacentes , VisitadosPrevios , VisitadosActuales , NuevosVisitados , SubPuntaje).
 
 
-% en los proximos 3 predicados, se verifica que si uno de los subpuntajes es 0, quiere decir que el conjunto de guiones a mirar no esta encerrado,
-% entonces computamos la lista de visitados hasta el momento para luego guardarla en la lista de visitados original (es decir, la que se usa en recorrer),
-% y decimos que puntaje es 0.
+
 territorioCapturado(Board , Color , [R,C,"-"] , [ [Ra,Ca,FichaA] | Adyacentes ] , VisitadosPrevios , VisitadosActuales , NuevosVisitados , SubPuntaje):-
 	FichaA = "-",
 	not(member( [Ra,Ca,FichaA] , VisitadosPrevios ) ),
@@ -181,7 +175,8 @@ territorioCapturado(Board , Color , [R,C,"-"] , [ [Ra,Ca,FichaA] | Adyacentes ] 
 	SubPuntaje is SubPuntaje1 + SubPuntaje2.
 
 
-
+% C.B: si la ficha ya era miembro de la lista original de visitados, o es una ficha del color opuesto al pasado por parametro,
+% entonces la ficha en cuestión (es decir, [R,C,"-"]) no forma parte del conjunto de fichas capturadas.
 territorioCapturado( _ , _ , [R,C,"-"] , [ [Ra,Ca,FichaA] | _ ] , VisitadosPrevios , _ , [ [R,C,"-"] | [] ] , 0):-
 	member( [Ra,Ca,FichaA] , VisitadosPrevios ).
 	
@@ -191,7 +186,7 @@ territorioCapturado( _ , Color , [R,C,"-"] , [ [_,_,FichaA] | _ ] , _ , _ , [ [R
 
 
 %% El metodo devuelve la proxima fila y columna a visitar.
-%% Si no hay mas que recorrer devuelve R=20, C=20.	
+%% Si no hay mas que recorrer devuelve R=19, C=19.	
 siguiente(R, C, R1, C1):-
 	R < 19,
 	C < 18,
@@ -279,9 +274,11 @@ locked(Board , [ [Ra,Ca,ColorA] | Adyacentes] , [R,C,Color] , Visitados , Aelimi
 
 
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%Predicados auxiliares que se usan en los predicados principales
+
 
 adyacentes(Board,[R,C],Lvalida):-
 	C1 is C-1,

@@ -9,8 +9,8 @@ var cellElems;
 var turnBlack = false;
 var bodyElem;
 var latestStone;
-var contadorTurno=0;
 
+var contadorTurno=0;
 var puntajeNegro = -1;
 var puntajeBlanco = -1;
 
@@ -102,8 +102,7 @@ function handleSuccess(response) {
 				
 			}else{
 				
-				puntajeNegro = response.data[0].Puntaje;
-				
+				puntajeNegro = response.data[0].Puntaje;				
 				if(puntajeNegro ==puntajeBlanco){
 					alert("La partida finalizo en empate, el puntaje de ambos fue: "+ puntajeBlanco);				
 				}
@@ -115,8 +114,7 @@ function handleSuccess(response) {
 				puntajeNegro = -1;
 				pengine.ask('emptyBoard(Board)');
 				
-			}
-				
+			}				
 			
 		}
 	}
@@ -131,6 +129,7 @@ function handleSuccess(response) {
 function handleFailure() {
     alert("Invalid move!");
 }
+
 /**
 * Called when one player pass his turn.	
 * If both player pass, the match ends.
@@ -141,9 +140,7 @@ function passTurn(){
 	if(contadorTurno == 1){
 
 		const s = "puntajeColor(" + Pengine.stringify(gridData) + ","+ Pengine.stringify("w")+", Puntaje)";
-		pengine.ask(s);
-		
-		
+		pengine.ask(s);		
 		contadorTurno=2;
 	}
 	else {
